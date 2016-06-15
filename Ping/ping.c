@@ -27,6 +27,8 @@ u_int16_t Compute_cksum(struct icmp *pIcmp)
 		tmp &= 0xff00;
 		sum += tmp;
 	}
+
+	//ICMP校验和带进位
 	while (sum >> 16)
 		sum = (sum >> 16) + (sum & 0x0000ffff);
 	sum = ~sum;
@@ -62,6 +64,7 @@ void SendPacket(int sock_icmp, struct sockaddr_in *dest_addr, int nSend)
 		(struct sockaddr *)dest_addr, sizeof(struct sockaddr_in)) < 0)
 	{
 		perror("sendto");
+		return;
 	}
 }
 
@@ -76,7 +79,7 @@ double GetRtt(struct timeval *RecvTime, struct timeval *SendTime)
 	}
 	sub.tv_sec -= SendTime->tv_sec;
 	
-	return sub.tv_sec * 1000.0 + sub.tv_usec / 1000.0; //单位毫秒
+	return sub.tv_sec * 1000.0 + sub.tv_usec / 1000.0; //转换单位为毫秒
 }
 
 int unpack(struct timeval *RecvTime)
@@ -89,26 +92,30 @@ int unpack(struct timeval *RecvTime)
 	ipHeadLen = Ip->ip_hl << 2;	//ip_hl字段单位为4字节
 	Icmp = (struct icmp *)(RecvBuffer + ipHeadLen);
 
+	//判断接收到的报文是否是自己所发报文的响应
 	if ((Icmp->icmp_type == ICMP_ECHOREPLY) && Icmp->icmp_id == getpid())
 	{
 		struct timeval *SendTime = (struct timeval *)Icmp->icmp_data;
 		rtt = GetRtt(RecvTime, SendTime);
+	
 		printf("%u bytes from %s: icmp_seq=%u ttl=%u time=%.1f ms\n",
 			ntohs(Ip->ip_len) - ipHeadLen,
 			inet_ntoa(Ip->ip_src),
 			Icmp->icmp_seq,
 			Ip->ip_ttl,
 			rtt);
+		
 		if (rtt < min || 0 == min)
 			min = rtt;
 		if (rtt > max)
 			max = rtt;
 		avg += rtt;
 		mdev += rtt * rtt;
+		
 		return 0;
 	}
-	else
-		return -1;
+		
+	return -1;
 }
 
 
@@ -119,11 +126,15 @@ void Statistics(int signo)
 	tmp = mdev / nRecv - avg * avg;
 	mdev = sqrt(tmp);
 	
-	printf("--- %s  ping statistics ---\n", pHost->h_name);
+	if (NULL != pHost)
+		printf("--- %s  ping statistics ---\n", pHost->h_name);
+	else
+		printf("--- %s  ping statistics ---\n", IP);
+		
 	printf("%d packets transmitted, %d received, %d%% packet loss, time %dms\n"
-		, SEND_NUM
+		, nSend
 		, nRecv
-		, (SEND_NUM - nRecv) / SEND_NUM * 100
+		, (nSend - nRecv) / nSend * 100
 		, (int)GetRtt(&LastRecvTime, &FirstSendTime));
 	printf("rtt min/avg/max/mdev = %.3f/%.3f/%.3f/%.3f ms\n",
 		min, avg, max, mdev);
@@ -132,24 +143,26 @@ void Statistics(int signo)
 	exit(0);
 }
 
-void RecvePacket(int sock_icmp, struct sockaddr_in *dest_addr)
+int RecvePacket(int sock_icmp, struct sockaddr_in *dest_addr)
 {
 	int RecvBytes = 0;
 	int addrlen = sizeof(struct sockaddr_in);
 	struct timeval RecvTime;
 
-	signal(SIGALRM, Statistics);
-	alarm(MAX_WAIT_TIME);
 	if ((RecvBytes = recvfrom(sock_icmp, RecvBuffer, RECV_BUFFER_SIZE,
 			0, (struct sockaddr *)dest_addr, &addrlen)) < 0)
 	{
 		perror("recvfrom");
-		return;
+		return 0;
 	}
-	nRecv++;
 	//printf("nRecv=%d\n", RecvBytes);
 	gettimeofday(&RecvTime, NULL);
 	LastRecvTime = RecvTime;
-	unpack(&RecvTime);
+
+	if (unpack(&RecvTime) == -1)
+	{
+		return -1; 
+	}
+	nRecv++;
 }
 

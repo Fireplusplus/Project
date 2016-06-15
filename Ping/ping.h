@@ -20,17 +20,19 @@
 #define ICMP_LEN  (ICMP_DATA_LEN + ICMP_HEAD_LEN)
 #define SEND_BUFFER_SIZE 128		//发送缓冲区大小
 #define RECV_BUFFER_SIZE 128		//接收缓冲区大小
-#define SEND_NUM 4 			//发送报文数
+#define SEND_NUM 100 			//发送报文数
 #define MAX_WAIT_TIME 3
 
 extern struct hostent *pHost;
 extern int sock_icmp;
+extern int nSend;
+extern char *IP;
 
 //发送ICMP报文
 void SendPacket(int sock_icmp, struct sockaddr_in *dest_addr, int nSend);
 
 //接收ICMP报文
-void RecvePacket(int sock_icmp, struct sockaddr_in *dest_addr);
+int RecvePacket(int sock_icmp, struct sockaddr_in *dest_addr);
 
 //计算校验和
 u_int16_t Compute_cksum(struct icmp *pIcmp);

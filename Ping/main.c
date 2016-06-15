@@ -1,14 +1,16 @@
 #include "ping.h"
 
 
-struct hostent * pHost;		//保存主机信息
-int sock_icmp;			//icmp套接字
+struct hostent * pHost = NULL;		//保存主机信息
+int sock_icmp;				//icmp套接字
+int nSend = 1;
+char *IP = NULL;
 
 void Call(int argc, char *argv[])
 {
+
 	struct protoent *protocol;
 	struct sockaddr_in dest_addr; 	//IPv4专用socket地址,保存目的地址
-	int nSend = 0;
 
 	in_addr_t inaddr;		//ip地址（网络字节序）
 
@@ -28,7 +30,7 @@ void Call(int argc, char *argv[])
 	//AF_INET:IPv4, SOCK_RAW:IP协议数据报接口, IPPROTO_ICMP:ICMP协议
 	if ((sock_icmp = socket(PF_INET, SOCK_RAW, protocol->p_proto/*IPPROTO_ICMP*/)) < 0)
 	{
-		perror("socket()");
+		perror("socket");
 		exit(EXIT_FAILURE);
 	}
 	dest_addr.sin_family = AF_INET;
@@ -49,18 +51,30 @@ void Call(int argc, char *argv[])
 		memmove(&dest_addr.sin_addr, &inaddr, sizeof(struct in_addr));
 	}
 
-	printf("PING %s(%s) %d bytes of data.\n", pHost->h_name, 
-		inet_ntoa(dest_addr.sin_addr), ICMP_LEN);
+	if (NULL != pHost)
+		printf("PING %s", pHost->h_name);
+	else
+		printf("PING %s", argv[1]);
+	printf("(%s) %d bytes of data.\n", inet_ntoa(dest_addr.sin_addr), ICMP_LEN);
+
+	IP = argv[1];
+	signal(SIGINT, Statistics);
 	while (nSend < SEND_NUM)
 	{
-		SendPacket(sock_icmp, &dest_addr, nSend + 1);
-		RecvePacket(sock_icmp, &dest_addr);
+		int unpack_ret;
+		
+		SendPacket(sock_icmp, &dest_addr, nSend);
+		
+		unpack_ret = RecvePacket(sock_icmp, &dest_addr);
+		if (-1 == unpack_ret)	//（ping回环时）收到了自己发出的报文,重新等待接收
+			RecvePacket(sock_icmp, &dest_addr);
+			
+
 		sleep(1);
 		nSend++;
 	}
-	Statistics(0);
 	
-	close(sock_icmp);
+	Statistics(0);	//输出信息，关闭套接字
 }
 
 int main(int argc, char *argv[])
