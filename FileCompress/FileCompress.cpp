@@ -37,11 +37,11 @@ void FileCompress::UnCompress(const std::string &FilePath)
 		exit(3);
 	}
 
-	// ´¦ÀíÍ·²¿ĞÅÏ¢
+	// å¤„ç†å¤´éƒ¨ä¿¡æ¯
 	std::string Postfix;
 	GetHead(input, Postfix);
 	
-	 // ´´½¨Êä³öÎÄ¼ş
+	 // åˆ›å»ºè¾“å‡ºæ–‡ä»¶
 	size_t begin = FilePath.find_first_of("\\");
 	if (begin == std::string::npos)
 		begin = -1;
@@ -58,7 +58,7 @@ void FileCompress::UnCompress(const std::string &FilePath)
 	}
 
 	int i = 0;
-	// Ìî³ä×Ö·û
+	// å¡«å……å­—ç¬¦
 	for (; i < 256; ++i)
 	{
 		info[i].ch = i;
@@ -93,11 +93,11 @@ void FileCompress::UnCompressCore(FILE *input, FILE *output, HuffmanTreeNode<Cod
 		memset(ReadBuf, '\0', _SIZE_);
 		n = fread(ReadBuf, 1, _SIZE_, input);
 
-		// ×ª»»ReadBufÖÁWriteBuf
+		// è½¬æ¢ReadBufè‡³WriteBuf
 		size_t r_idx = 0;
 		for (; r_idx < n; r_idx++)
 		{
-			// ×ª»»µ¥¸ö×Ö½Ú
+			// è½¬æ¢å•ä¸ªå­—èŠ‚
 			unsigned char ch = ReadBuf[r_idx];
 			for (; pos < 8; pos++, ch <<= 1)
 			{
@@ -140,17 +140,17 @@ void FileCompress::GetHead(FILE *src, std::string &Postfix)
 {
 	assert(src);
 
-	// »ñÈ¡ºó×ºÃû
+	// è·å–åç¼€å
 	unsigned char buf[_FILE_NAME_SIZE_];
 	int size = _FILE_NAME_SIZE_;
 	GetLine(src, buf, size);
 	Postfix += (char *)buf;
 
-	// »ñÈ¡ĞĞÊı
+	// è·å–è¡Œæ•°
 	GetLine(src, buf, size);
 	int line = atoi((char *)buf);
 
-	// »ñÈ¡²¢ÉèÖÃ×Ö·û³öÏÖ´ÎÊı
+	// è·å–å¹¶è®¾ç½®å­—ç¬¦å‡ºç°æ¬¡æ•°
 	while (line--)
 	{
 		GetLine(src, buf, size);
@@ -172,28 +172,6 @@ void FileCompress::GetLine(FILE *src, unsigned char *buf, int size)
 		index++;
 	}
 	buf[index] = '\0';
-
-	//int index = 0;
-	//int ch;
-	//while ((ch = fgetc(src)) != EOF)
-	//{
-	//	if (ch != '\n')
-	//		buf[index++] = ch;
-	//	else
-	//		break;
-	//}
-
-	//if (index == 1)
-	//{
-	//	while ((ch = fgetc(src)) != EOF)
-	//	{
-	//		if (ch != '\n')
-	//			buf[index++] = ch;
-	//		else
-	//			break;
-	//	}
-	//}
-	//buf[index] = '\0';
 }
 
 
@@ -227,13 +205,13 @@ void FileCompress::FillInfo(FILE *src)
 	assert(src);
 
 	int i = 0;
-	// Ìî³ä×Ö·û
+	// å¡«å……å­—ç¬¦
 	for (; i < 256; ++i)
 	{
 		info[i].ch = i;
 	}
 
-	// Ìî³ä³öÏÖ´ÎÊı
+	// å¡«å……å‡ºç°æ¬¡æ•°
 	unsigned char buf[_SIZE_];
 	size_t n;
 	do
@@ -246,7 +224,7 @@ void FileCompress::FillInfo(FILE *src)
 		}
 	} while (n > 0);
 
-	// Ìî³ä±àÂë
+	// å¡«å……ç¼–ç 
 	CodeInfo invalid;
 	invalid.cnt = 0;
 	HuffmanTree<CodeInfo> hfm(info, 256, invalid);
@@ -301,16 +279,16 @@ void FileCompress::CompressCore(FILE *src, FILE *dst, const std::string &FilePat
 
 	SaveCode(dst, FilePath);
 	
-	// ¶ÁÊı¾İ
+	// è¯»æ•°æ®
 	do
 	{
-		// ÒÀ´ÎÈ¡Ã¿¸ö×Ö½Ú×ª»»
+		// ä¾æ¬¡å–æ¯ä¸ªå­—èŠ‚è½¬æ¢
 		memset(buf, '\0', _SIZE_);
 		n = fread(buf, 1, _SIZE_, src);
 		size_t idx = 0;
 		while (idx < n)
 		{
-			// ×ª»»µ¥¸ö×Ö½Ú
+			// è½¬æ¢å•ä¸ªå­—èŠ‚
 			const std::string &CurCode = info[buf[idx++]].code;
 			size_t len = CurCode.length();
 			size_t i_len = 0;
@@ -325,14 +303,14 @@ void FileCompress::CompressCore(FILE *src, FILE *dst, const std::string &FilePat
 					}
 				}
 				
-				// ÏÈ»º´æµ½out
+				// å…ˆç¼“å­˜åˆ°out
 				if (8 == pos)
 				{
 					out[out_idx++] = ch;
 					pos = 0;
 					ch = 0;
 
-					// Êä³öµ½ÎÄ¼ş
+					// è¾“å‡ºåˆ°æ–‡ä»¶
 					if (_SIZE_ == out_idx)
 					{
 						fwrite(out, 1, out_idx, dst);
@@ -343,7 +321,7 @@ void FileCompress::CompressCore(FILE *src, FILE *dst, const std::string &FilePat
 		} // while
 	} while (n > 0);
 
-	// ´¦ÀíÊ£ÓàµÄÎ»
+	// å¤„ç†å‰©ä½™çš„ä½
 	if (8 > pos && 0 < pos)
 	{
 		int j = 0;
@@ -352,17 +330,17 @@ void FileCompress::CompressCore(FILE *src, FILE *dst, const std::string &FilePat
 		out[out_idx++] = ch;
 	}
 
-	// ´¦ÀíÊ£ÓàµÄ×Ö½Ú
+	// å¤„ç†å‰©ä½™çš„å­—èŠ‚
 	if (out_idx > 0)
 		fwrite(out, 1, out_idx, dst);
 }
 
 void FileCompress::SaveCode(FILE *dst, const std::string &FilePath)
 {
-	// Ñ¹ËõÎÄ¼şÍ·¸ñÊ½:
-	// À©Õ¹Ãû
-	// ±àÂëĞĞÊı
-	// ±àÂëĞĞ ...
+	// å‹ç¼©æ–‡ä»¶å¤´æ ¼å¼:
+	// æ‰©å±•å
+	// ç¼–ç è¡Œæ•°
+	// ç¼–ç è¡Œ ...
 
 	assert(NULL != dst);
 
