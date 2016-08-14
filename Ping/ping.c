@@ -57,6 +57,9 @@ void SetICMP(u_int16_t seq)
 		FirstSendTime = *pTime;
 }
 
+//可以对超时时间做个限制，每发出一个报文，设定闹钟，时间为2*rtt，
+//再注册SIGALRM信号处理函数打印Destination Host Unreachable
+//鉴于超时后还有可能收到ICMP报文，所以此处不处理
 void SendPacket(int sock_icmp, struct sockaddr_in *dest_addr, int nSend)
 {
 	SetICMP(nSend);
