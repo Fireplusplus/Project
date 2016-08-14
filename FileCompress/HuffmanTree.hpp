@@ -15,7 +15,7 @@ struct HuffmanTreeNode
 		, pParent(NULL)
 	{}
 
-	T 				_weight;
+	T 		_weight;
 	HuffmanTreeNode *pLeft;
 	HuffmanTreeNode *pRight;
 	HuffmanTreeNode *pParent;
