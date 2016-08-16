@@ -1,5 +1,7 @@
 #include "ping.h"
 
+#define WAIT_TIME 5
+
 char SendBuffer[SEND_BUFFER_SIZE];
 char RecvBuffer[RECV_BUFFER_SIZE];
 int nRecv = 0;	//实际接收到的报文数
@@ -57,9 +59,6 @@ void SetICMP(u_int16_t seq)
 		FirstSendTime = *pTime;
 }
 
-//可以对超时时间做个限制，每发出一个报文，设定闹钟，时间为2*rtt，
-//再注册SIGALRM信号处理函数打印Destination Host Unreachable
-//鉴于超时后还有可能收到ICMP报文，所以此处不处理
 void SendPacket(int sock_icmp, struct sockaddr_in *dest_addr, int nSend)
 {
 	SetICMP(nSend);
@@ -151,7 +150,9 @@ int RecvePacket(int sock_icmp, struct sockaddr_in *dest_addr)
 	int RecvBytes = 0;
 	int addrlen = sizeof(struct sockaddr_in);
 	struct timeval RecvTime;
-
+	
+	signal(SIGALRM, Statistics);
+	alarm(WAIT_TIME);
 	if ((RecvBytes = recvfrom(sock_icmp, RecvBuffer, RECV_BUFFER_SIZE,
 			0, (struct sockaddr *)dest_addr, &addrlen)) < 0)
 	{
