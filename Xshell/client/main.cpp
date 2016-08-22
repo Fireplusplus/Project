@@ -5,10 +5,10 @@
 
 int main()
 {
-	std::string ip("192.168.43.222"), port("6666");
+	//std::string ip("192.168.43.222"), port("6666");
 
-	/*std::cout << "Please Enter [ip] & [port]" << std::endl;
-	std::cin >> ip >> port;*/
+	std::cout << "Please Enter [ip] & [port]" << std::endl;
+	std::cin >> ip >> port;
 
 	SOCKET sock = init((char *)ip.c_str(), atoi(port.c_str()));
 
