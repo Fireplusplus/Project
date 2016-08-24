@@ -59,13 +59,8 @@ clean:
 output: $(SER) $(CLI)
 	@mkdir -p output/server
 	@mkdir -p output/client
-	@cp -rf log output/server
-	@cp -rf conf output/client
-	@cp -rf conf output/server
 	@cp -f $(CLI) output/client
 	@cp -f $(SER) output/server
-	@cp plugin/ctl_server.sh output/server
-	@cp plugin/ctl_client.sh output/client
 
 	
 .PHONY:debug
