@@ -1,4 +1,4 @@
-scp file name@ip:/home/dir 
+scp file name@ip:dir 
 
 ssh name@ip
 
