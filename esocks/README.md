@@ -1,11 +1,11 @@
-scp file name@ip:dir 
+scp file name@IP:dir 
 
-ssh name@ip
+ssh name@IP
 
 长城防火墙：
 
-1.域名劫持（返回一个错误的ip或不返回）-->代理
+1.域名劫持（返回一个错误的IP或不返回）-->代理
 
-2.ip黑名单（国家入口网关ip封锁）	 -->代理
+2.IP黑名单（国家入口网关IP封锁）	 -->代理
 
 3.主干路由器的关键字过滤阻断		 -->加密
