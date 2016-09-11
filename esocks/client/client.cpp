@@ -125,8 +125,8 @@ int proc_transfer(int in, const char *ip, const char *port)
 	Param up = {in, out, 0};
 	Param down = {out, in, 0};
 	
-	pthread_create(&up.bro, NULL, transfer, &up);
-	pthread_create(&down.bro, NULL, transfer, &down);
+	pthread_create(&down.bro, NULL, transfer, &up);
+	pthread_create(&up.bro, NULL, transfer, &down);
 
 	pthread_join(up.bro, NULL);
 	pthread_join(down.bro, NULL);
