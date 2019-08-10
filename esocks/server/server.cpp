@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
 	int listen_sock = socket(AF_INET, SOCK_STREAM, 0);
 	if (listen_sock < 0)
 	{
-		perror("socket");
+		perror("[main]socket");
 		exit(2);
 	}
 
@@ -42,13 +42,13 @@ int main(int argc, char *argv[])
 	ser_addr.sin_addr.s_addr = INADDR_ANY;
 	if (bind(listen_sock, (sockaddr *)&ser_addr, sizeof(ser_addr)) < 0)
 	{
-		perror("bind");
+		perror("[main]bind");
 		exit(3);
 	}
 	
 	if (listen(listen_sock, 5) < 0)
 	{
-		perror("listen");
+		perror("[main]listen");
 		exit(4);
 	}
 
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 		int in = accept(listen_sock, (sockaddr *)&cli_addr, &len);
 		if (in < 0)
 		{
-			perror("accept");	
+			perror("[main]accept");	
 			continue;
 		}
 		
@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 		pid_t id1 = fork();		
 		if (id1 < 0)
 		{
-			perror("fork");
+			perror("[main]fork");
 			continue;
 		}
 		else if (id1 > 0)	// father
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 			pid_t id2 = fork();
 			if (id2 < 0)
 			{
-				perror("fork");
+				perror("[main]fork");
 				exit(5);
 			}
 			else if (id2 > 0)	// father
@@ -106,14 +106,15 @@ int proc_socks(int in)
 
 	if (sreq.ver != 5 || sreq.n != 1)
 	{
-		cout << "protocol error" << endl;
+		cout << "[proc_socks]protocol error" << endl;
+        cout << "sreq.ver=" << sreq.ver << " srep.n=" << sreq.n << endl;
 		return 6;
 	}
 	char methods[8];	
 	recv_n(in, methods, sreq.n);
 	if (0 != methods[0])
 	{
-		cout << "methods error" << endl;
+		cout << "[proc_socks]methods error" << endl;
 		return 7;
 	}
 
@@ -132,7 +133,7 @@ int proc_socks(int in)
 	recv_n(in, (char *)&areq, sizeof(areq));
 	if (areq.ver != 5 || areq.cmd != 1 || areq.rsv != 0)
 	{
-		cout << "protocol error" << endl;
+		cout << "[proc_socks]protocol error" << endl;
 		return 8;
 	}
 	if (areq.atype == 1)
@@ -151,7 +152,7 @@ int proc_socks(int in)
 		hostent *host = gethostbyname(domain);
 		if (!host || host->h_addrtype != AF_INET || host->h_length <= 0)
 		{
-			cout << "protocol error" << endl;
+			cout << "[proc_socks]protocol error" << endl;
 			return 9;
 		}
 		memcpy(&out_addr.sin_addr.s_addr, host->h_addr_list[0], 
@@ -170,13 +171,13 @@ int proc_socks(int in)
 	int out = socket(AF_INET, SOCK_STREAM, 0);
 	if (out < 0)
 	{
-		perror("socket");
+		perror("[proc_socks]socket");
 		return 10;
 	}
 
 	if (connect(out, (sockaddr *)&out_addr, sizeof(out_addr)) < 0)
 	{
-		perror("connect");
+		perror("[proc_socks]connect");
 		return 11;
 	}
 	
