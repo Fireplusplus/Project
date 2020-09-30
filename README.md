@@ -1,3 +1,3 @@
 # Project
 some small project
-q
+Very helpfull for user
