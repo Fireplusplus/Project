@@ -1,0 +1,6 @@
+<span
+              className="remove"
+              onClick={() => handleRemoveItem(layoutItem.i)}
+            >
+              x
+            </span>

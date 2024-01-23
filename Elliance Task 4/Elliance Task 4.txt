@@ -1,0 +1,3 @@
+Create React grid layout and add parameter and value inside the card. 
+Then once added need to make sure the added parameter and value is not gone once refresh.
+Add close button and resizable button for each card.
