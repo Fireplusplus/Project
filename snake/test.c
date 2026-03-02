@@ -9,7 +9,7 @@ void menu()
 	printf("\n");
 	printf("\t\t1. start\n");
 	printf("\t\t2. exit\n");
-	printf("\t    please choose:");
+	printf("\t    please choose: ");
 }
 
 enum option
@@ -34,7 +34,7 @@ int main()
 			play(p_snake, &food);
 			input = 0;
 			print(p_snake);
-			printf("\tGame Over!\n");
+			printf("\tGame is Over....:(\n");
 			break;
 		case EXIT:
 			input = 0;
